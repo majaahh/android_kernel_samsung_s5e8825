@@ -1680,7 +1680,10 @@ static int ear_detect_enable_save(void *device_data)
 		return SEC_ERROR;
 	}
 
-	core_data->plat_data->ed_enable = sec->cmd_param[0];
+	if (atomic_read(&core_data->plat_data->power_state) == SEC_INPUT_STATE_LPM)
+		core_data->plat_data->ed_enable = sec->cmd_param[0];
+	else
+		core_data->plat_data->ed_enable = sec->cmd_param[0] != 0 ? 3 : 0;
 	ts_info("ear detect mode(%d)", core_data->plat_data->ed_enable);
 
 	sec->cmd_state = SEC_CMD_STATUS_OK;

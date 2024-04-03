@@ -1425,9 +1425,13 @@ static void goodix_ts_report_status(struct goodix_ts_core *cd, struct goodix_ts_
 		}
 	} else if (ts_event->status_type == TYPE_STATUS_EVENT_VENDOR_INFO) {
 		if (ts_event->status_id == STATUS_EVENT_VENDOR_PROXIMITY) {
-			ts_event->status_data[0] = ts_event->status_data[0] == 5 || !ts_event->status_data[0];
-			cd->ts_event.hover_event = ts_event->status_data[0];
-			sec_input_proximity_report(cd->bus->dev, ts_event->status_data[0]);
+			if (atomic_read(&cd->plat_data->power_state) == SEC_INPUT_STATE_LPM || !cd->plat_data->touch_count) {
+				// Report actual range through hover proximity and block touch proximity during screen on
+				// When panel is in LPM state use touch proximity
+				ts_event->status_data[0] = ts_event->status_data[0] == 5 || !ts_event->status_data[0];
+				cd->ts_event.hover_event = ts_event->status_data[0];
+				sec_input_proximity_report(cd->bus->dev, ts_event->status_data[0]);
+			}
 		} else if (ts_event->status_id == STATUS_EVENT_VENDOR_STATE_CHANGED) {
 			if (ts_event->status_data[0] == 2 && ts_event->status_data[1] == 2) {
 				ts_info("Normal changed");
