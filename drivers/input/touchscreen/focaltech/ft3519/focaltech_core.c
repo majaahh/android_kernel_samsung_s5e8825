@@ -859,11 +859,15 @@ static int fts_read_proximity_result(struct fts_ts_data *ts_data)
 	else
 		ts_data->hover_event = (val >> 4);
 
-	ts_data->hover_event = (ts_data->hover_event == 5 || !ts_data->hover_event);
+	if (atomic_read(&ts_data->pdata->power_state) == SEC_INPUT_STATE_LPM || !ts_data->touchs) {
+		// Report actual range through hover proximity and block touch proximity during screen on
+		// When panel is in LPM state use touch proximity
+		ts_data->hover_event = (ts_data->hover_event == 5 || !ts_data->hover_event);
 
-	input_report_abs(ts_data->pdata->input_dev_proximity, ABS_MT_CUSTOM, ts_data->hover_event);
-	input_sync(ts_data->pdata->input_dev_proximity);
-	FTS_INFO("proximity: %d", ts_data->hover_event);
+		input_report_abs(ts_data->pdata->input_dev_proximity, ABS_MT_CUSTOM, ts_data->hover_event);
+		input_sync(ts_data->pdata->input_dev_proximity);
+		FTS_INFO("proximity: %d", ts_data->hover_event);
+	}
 
 	return 0;
 }
