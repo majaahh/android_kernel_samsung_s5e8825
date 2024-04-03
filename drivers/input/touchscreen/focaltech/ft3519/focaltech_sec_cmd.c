@@ -2602,7 +2602,10 @@ static int ear_detect_enable_save(void *device_data)
 	else
 		ts_data->power_mode &= ~FTS_POWER_MODE_EAR_DETECT;
 
-	ts_data->pdata->ed_enable = sec->cmd_param[0];
+	if (atomic_read(&ts_data->pdata->power_state) == SEC_INPUT_STATE_LPM)
+		ts_data->pdata->ed_enable = sec->cmd_param[0];
+	else
+		ts_data->pdata->ed_enable = sec->cmd_param[0] != 0 ? 3 : 0;
 	sec->cmd_state = SEC_CMD_STATUS_OK;
 
 	return SEC_SUCCESS;
