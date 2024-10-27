@@ -672,9 +672,11 @@ int cal_if_init(void *dev)
 		cmucal_dbg_set_cmu_peris_base(res.start);
 	cal_initialized = 1;
 
+#if defined(CONFIG_DEBUG_FS)
 	vclk_debug_init();
 
 	pmucal_dbg_debugfs_init();
+#endif
 
 	return 0;
 }
