@@ -683,6 +683,10 @@ static inline void cmucal_dbg_set_cmu_core_base(u32 base_addr)
 {
 	return ;
 }
+static inline void cmucal_dbg_set_cmu_nocl0_base(u32 base_addr)
+{
+	return ;
+}
 static inline void cmucal_dbg_set_cmu_cpucl0_base(u32 base_addr)
 {
 	return ;
