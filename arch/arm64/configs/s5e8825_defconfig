@@ -7278,6 +7278,13 @@ CONFIG_BATTERY_GKI=y
 # CONFIG_BATTERY_SAMSUNG_REBOOT is not set
 # CONFIG_SBP_FG is not set
 # end of Samsung Battery Common drivers
+
+# CONFIG_FUELGAUGE_S2MU106_USE_5MILLIOHM is not set
+
+#
+# PDIC configs
+#
+# CONFIG_MFD_S2MU106 is not set
 # end of Device Drivers
 
 #
