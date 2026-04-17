@@ -9,3 +9,4 @@ else ifneq (,$(filter y,$(CONFIG_SENSORS_A96T396) $(CONFIG_SENSORS_A96T396_SUB) 
 endif
 
 obj-$(CONFIG_SENSORS_SX9380) += sx938x.o
+obj-$(CONFIG_SENSORS_ISG6320)	    += isg6320.o
