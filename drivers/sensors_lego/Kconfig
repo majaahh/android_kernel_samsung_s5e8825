@@ -131,6 +131,42 @@ config SENSORS_A96T396_BIRDIE
 	help
 	Say Y here if you use BIRDIE grip firmware.
 
+config SENSORS_ISG6320
+	depends on I2C
+	tristate "ISG6320 grip"
+	default n
+	help
+	  If you say yes here if you use ISG6320 for grip.
+	  This option enables grip sensors using
+	  IMAGIS ISG6320 device driver for grip.
+
+config SENSORS_ISG6320_SUB
+	depends on I2C
+	tristate "ISG6320 grip sub"
+	default n
+	help
+	  If you say yes here if you use ISG6320_SUB for grip sub.
+	  This option enables grip sensors using
+	  IMAGIS ISG6320_SUB device driver for grip sub.
+
+config SENSORS_ISG6320_SUB2
+	depends on I2C
+	tristate "ISG6320 grip sub2"
+	default n
+	help
+	  If you say yes here if you use ISG6320_SUB2 for grip sub2.
+	  This option enables grip sensors using
+	  IMAGIS ISG6320_SUB2 device driver for grip sub2.
+
+config SENSORS_ISG6320_WIFI
+	depends on I2C
+	tristate "ISG6320 grip wifi"
+	default n
+	help
+	  If you say yes here if you use ISG6320_WIFI for grip wifi.
+	  This option enables grip sensors using
+	  IMAGIS ISG6320_WIFI device driver for grip wifi.
+
 config SENSORS_FW_VENDOR
 	depends on I2C
 	tristate "for grip sensor firmware in vendor"
@@ -179,3 +215,39 @@ config SENSORS_SUPPORT_LOGIC_PARAMETER
 	bool "support grip logic fw"
 	help
 	  Say Y here, if the model support logic firmware.
+
+config USE_MULTI_CHANNEL
+	tristate "Grip sensor multi chennel"
+	default n
+	help
+	  Enable grip multi channel
+	  This option enables feature that is related multi-Channel for grip Sensor.
+
+config UNSUPPORT_UNKNOWN_MODE
+	tristate "Unsupport unknown mode for specific regions"
+	default n
+	help
+	  This option disable grip unknown mode concept for specific project.
+
+config SUPPORT_MCC_THRESHOLD_CHANGE
+	depends on I2C
+	tristate "Change grip sensor threshold according to the MCC value"
+	default n
+	help
+	  Say Y here if you need to check mcc(mobile country code).
+	  This option enables when it is necessary to adjust the threshold
+	  according to the mcc value.
+	  Say N here if you do not need to check mcc.
+
+config SENSORS_SKIP_CABLE_RESET
+	tristate "skip grip reset when usb/ta/data cable attached"
+	default n
+	help
+	  new ANFR concept to skip grip reset
+
+config SENSORS_GRIP_SCANOFF
+	bool "Grip sensor low power sleep mode"
+	default n
+	help
+	  Scan off for low current consumption of the unused grip sensor.
+	  This option is for DM USA&CAN models, user binary.
