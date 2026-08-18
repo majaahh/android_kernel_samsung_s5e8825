@@ -469,9 +469,9 @@ int stm_ts_execute_autotune(struct stm_ts_data *ts, bool issaving)
 			ts->tdata->nvdata.cal_fail_cnt = 0;
 		if (ret < 0) {
 			ts->tdata->nvdata.cal_fail_cnt++;
-			ts->tdata->nvdata.cal_fail_falg = 0;
+			ts->tdata->nvdata.cal_fail_flag = 0;
 		} else {
-			ts->tdata->nvdata.cal_fail_falg = SEC_CAL_PASS;
+			ts->tdata->nvdata.cal_fail_flag = SEC_CAL_PASS;
 			ts->is_cal_done = true;
 		}
 		stm_tclm_data_write(ts->dev, SEC_TCLM_NVM_ALL_DATA);
@@ -593,13 +593,13 @@ static const int stm_ts_fw_updater(struct stm_ts_data *ts, const u8 *fw_data)
 int stm_ts_fw_update_on_probe(struct stm_ts_data *ts)
 {
 	int retval = 0;
+	int retry = 3;
 	const struct firmware *fw_entry = NULL;
 	char fw_path[STM_TS_MAX_FW_PATH];
 	const struct stm_ts_header *header;
 #ifdef TCLM_CONCEPT
 	int ret = 0;
 	bool restore_cal = false;
-	int retry = 3;
 
 	if (ts->tdata->support_tclm_test) {
 		ret = sec_tclm_test_on_probe(ts->tdata);

@@ -198,6 +198,36 @@ int sec_input_store_grip_data(struct device *dev, int *cmd_param)
 }
 EXPORT_SYMBOL(sec_input_store_grip_data);
 
+int sec_input_check_cover_type(struct device *dev)
+{
+	struct sec_ts_plat_data *pdata = dev->platform_data;
+	int cover_cmd = 0;
+
+	switch (pdata->cover_type) {
+	case SEC_COVER_TYPE_FLIP_COVER:
+	case SEC_COVER_TYPE_SVIEW_COVER:
+	case SEC_COVER_TYPE_SVIEW_CHARGER_COVER:
+	case SEC_COVER_TYPE_S_VIEW_WALLET_COVER:
+	case SEC_COVER_TYPE_LED_COVER:
+	case SEC_COVER_TYPE_CLEAR_COVER:
+	case SEC_COVER_TYPE_KEYBOARD_KOR_COVER:
+	case SEC_COVER_TYPE_KEYBOARD_US_COVER:
+	case SEC_COVER_TYPE_CLEAR_SIDE_VIEW_COVER:
+	case SEC_COVER_TYPE_MINI_SVIEW_WALLET_COVER:
+	case SEC_COVER_TYPE_MONTBLANC_COVER:
+	case SEC_COVER_TYPE_CLEAR_CAMERA_VIEW_COVER:
+		cover_cmd = pdata->cover_type;
+		break;
+	default:
+		input_err(true, dev, "%s: not change touch state, cover_type=%d\n",
+				__func__, pdata->cover_type);
+		break;
+	}
+
+	return cover_cmd;
+}
+EXPORT_SYMBOL(sec_input_check_cover_type);
+
 __visible_for_testing int sec_input_store_grip_data_edge(struct sec_ts_plat_data *pdata, int *cmd_param)
 {
 	if (!store_grip_data_cmd_verify(pdata, cmd_param))

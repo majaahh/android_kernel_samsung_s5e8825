@@ -212,6 +212,7 @@ const struct file_operations ops_name = {				\
 #define BTN_PALM		0x118	/* palm flag */
 #define BTN_LARGE_PALM		0x119	/* large palm flag */
 
+#define KEY_BLACK_UI_GESTURE	0x1c7
 #define KEY_APPSELECT		0x244	/* AL Select Task/Application */
 #define KEY_EMERGENCY		0x2a0
 #define KEY_INT_CANCEL		0x2be	/* for touch event skip */
@@ -745,6 +746,10 @@ struct sec_ts_plat_data {
 	atomic_t touch_noise_status;
 	atomic_t touch_pre_noise_status;
 
+	int gesture_id;
+	int gesture_x;
+	int gesture_y;
+
 	struct sec_ts_fod_data fod_data;
 	struct sec_ts_aod_data aod_data;
 	struct sec_ts_aod_data aod_noti_data;
@@ -971,6 +976,7 @@ void sec_input_proximity_report(struct device *dev, int data);
 void sec_input_release_all_finger(struct device *dev);
 void sec_input_coord_event_fill_slot(struct device *dev, int t_id);
 void sec_input_coord_report(struct device *dev, u8 t_id);
+void sec_input_gesture_report(struct device *dev, int id, int x, int y);
 void sec_input_coord_log(struct device *dev, u8 t_id, int action);
 void location_detect(struct sec_ts_plat_data *pdata, int t_id);
 
@@ -983,6 +989,7 @@ int stui_tsp_type(void);
 /* input_ic_settings.c */
 enum sec_ts_error sec_input_set_temperature(struct device *dev, int state);
 void sec_input_set_grip_type(struct device *dev, u8 set_type);
+int sec_input_check_cover_type(struct device *dev);
 int sec_input_store_grip_data(struct device *dev, int *cmd_param);
 void sec_input_set_fod_info(struct device *dev, int vi_x, int vi_y, int vi_size, int vi_event);
 ssize_t sec_input_get_fod_info(struct device *dev, char *buf);

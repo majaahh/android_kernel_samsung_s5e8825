@@ -120,6 +120,7 @@ __visible_for_testing void sec_input_set_prop_touch(struct device *dev, struct i
 	set_bit(BTN_TOOL_FINGER, input_dev->keybit);
 	set_bit(BTN_PALM, input_dev->keybit);
 	set_bit(BTN_LARGE_PALM, input_dev->keybit);
+	set_bit(KEY_BLACK_UI_GESTURE, input_dev->keybit);
 	set_bit(KEY_INT_CANCEL, input_dev->keybit);
 
 	set_bit(propbit, input_dev->propbit);
@@ -193,6 +194,56 @@ void sec_input_proximity_report(struct device *dev, int data)
 	}
 }
 EXPORT_SYMBOL(sec_input_proximity_report);
+
+void sec_input_gesture_report(struct device *dev, int id, int x, int y)
+{
+	struct sec_ts_plat_data *pdata = dev->platform_data;
+	char buff[SEC_TS_GESTURE_REPORT_BUFF_SIZE] = { 0 };
+
+	if (!pdata->input_dev)
+		return;
+
+	pdata->gesture_id = id;
+	pdata->gesture_x = x;
+	pdata->gesture_y = y;
+
+	input_report_key(pdata->input_dev, KEY_BLACK_UI_GESTURE, 1);
+	efunc.input_sync(pdata->input_dev);
+	input_report_key(pdata->input_dev, KEY_BLACK_UI_GESTURE, 0);
+	efunc.input_sync(pdata->input_dev);
+
+	if (id == SPONGE_EVENT_TYPE_SPAY) {
+		snprintf(buff, sizeof(buff), "SPAY");
+		pdata->hw_param.all_spay_count++;
+	} else if (id == SPONGE_EVENT_TYPE_SINGLE_TAP) {
+		snprintf(buff, sizeof(buff), "SINGLE TAP");
+	} else if (id == SPONGE_EVENT_TYPE_AOD_DOUBLETAB) {
+		snprintf(buff, sizeof(buff), "AOD");
+		pdata->hw_param.all_aod_tap_count++;
+	} else if (id == SPONGE_EVENT_TYPE_FOD_PRESS) {
+		snprintf(buff, sizeof(buff), "FOD PRESS");
+	} else if (id == SPONGE_EVENT_TYPE_FOD_RELEASE) {
+		snprintf(buff, sizeof(buff), "FOD RELEASE");
+	} else if (id == SPONGE_EVENT_TYPE_FOD_OUT) {
+		snprintf(buff, sizeof(buff), "FOD OUT");
+	} else if (id == SPONGE_EVENT_TYPE_TSP_SCAN_UNBLOCK) {
+		snprintf(buff, sizeof(buff), "SCAN UNBLOCK");
+	} else if (id == SPONGE_EVENT_TYPE_TSP_SCAN_BLOCK) {
+		snprintf(buff, sizeof(buff), "SCAN BLOCK");
+	} else if (id == SPONGE_EVENT_TYPE_LONG_PRESS) {
+		snprintf(buff, sizeof(buff), "LONG PRESS");
+	} else {
+		snprintf(buff, sizeof(buff), "");
+	}
+
+#if IS_ENABLED(CONFIG_SAMSUNG_PRODUCT_SHIP)
+	input_info(true, dev, "%s: %s: %d\n", __func__, buff, pdata->gesture_id);
+#else
+	input_info(true, dev, "%s: %s: %d, %d, %d\n",
+			__func__, buff, pdata->gesture_id, pdata->gesture_x, pdata->gesture_y);
+#endif
+}
+EXPORT_SYMBOL(sec_input_gesture_report);
 
 void sec_input_release_all_finger(struct device *dev)
 {
