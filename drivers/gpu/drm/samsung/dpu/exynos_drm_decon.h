@@ -191,7 +191,7 @@ static inline bool IS_DECON_HIBER_STATE(struct exynos_drm_crtc *exynos_crtc)
 }
 
 #if IS_ENABLED(CONFIG_DRM_MCD_COMMON)
-#if defined(CONFIG_USDM_PANEL_DPUI)
+#if IS_ENABLED(CONFIG_DISPLAY_USE_INFO) || IS_ENABLED(CONFIG_USDM_PANEL_DPUI)
 void log_decon_bigdata(struct decon_device *decon);
 #endif
 #endif
