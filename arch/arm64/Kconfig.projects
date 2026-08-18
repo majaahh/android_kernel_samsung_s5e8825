@@ -1,0 +1,6 @@
+# SPDX-License-Identifier: GPL-2.0-only
+config SEC_A25X_PROJECT
+	default n
+	bool "Samsung A25X Project"
+	help
+	  Support for Samsung A25X Project
