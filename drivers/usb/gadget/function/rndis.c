@@ -1095,6 +1095,8 @@ int rndis_rm_hdr(struct gether *port,
 			struct sk_buff_head *list)
 {
 	u32 num_pkts = 1;
+	/* tmp points to a struct rndis_packet_msg_type */
+	__le32 *tmp = (void *)skb->data;
 
 	if (skb->len > rndis_ul_max_xfer_size_rcvd)
 		rndis_ul_max_xfer_size_rcvd = skb->len;
