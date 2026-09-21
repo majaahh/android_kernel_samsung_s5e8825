@@ -102,6 +102,16 @@ static int s2mf301_muic_rid_isr(void *_data);
 	(s2mf301_info("%s, %s in NULL\n", __func__, #func), -1))
 #endif
 
+static int muic_psy_get_property(struct power_supply *psy,
+			    enum power_supply_property psp,
+			    union power_supply_propval *val)
+{
+	if (!psy)
+		return -ENODEV;
+
+	return psy->desc->get_property(psy, psp, val);
+}
+
 #ifndef CONFIG_HV_MUIC_S2MF301_AFC
 int muic_afc_set_voltage(int vol)
 {
@@ -498,6 +508,14 @@ static int _s2mf301_muic_sel_path(struct s2mf301_muic_data *muic_data,
 
 	reg_val1 = s2mf301_i2c_read_byte(muic_data->i2c, S2MF301_REG_MANUAL_SW_CTRL);
 	reg_val2 = reg_val1 & ~S2MF301_MANUAL_SW_CTRL_SWITCH_MASK;
+
+#if IS_ENABLED(CONFIG_SAMSUNG_PRODUCT_SHIP)
+	if ((path_data == S2MF301_PATH_UART_AP ||
+		path_data == S2MF301_PATH_UART_CP)) {
+		s2mf301_info("%s: UART path blocked in ship mode, set COM_OPEN\n", __func__);
+		path_data = S2MF301_PATH_OPEN;
+	}
+#endif
 
 #if IS_ENABLED(CONFIG_HICCUP_CHARGER)
 	if (muic_data->is_hiccup_mode)
@@ -1852,12 +1870,18 @@ static void s2mf301_muic_get_pm_ops(struct s2mf301_muic_data *muic_data, struct 
 {
 	union power_supply_propval value;
 	struct s2mf301_pm_rid_ops *p_pm_rid_ops;
-
-	s2mf301_info("%s, get ops success\n", __func__);
+    int ret = 0;
 
 	muic_data->rid_isr = s2mf301_muic_rid_isr;
 	value.strval = (const char *)muic_data;
-	power_supply_get_property(psy, (enum power_supply_property)POWER_SUPPLY_LSI_PROP_RID_OPS, &value);
+
+    ret = muic_psy_get_property(psy,
+			(enum power_supply_property)POWER_SUPPLY_LSI_PROP_RID_OPS,
+			&value);
+	if (ret) {
+		pr_err("%s failed to get psy prop, ret=%d\n", __func__, ret);
+		return;
+	}
 
 	muic_data->psy_pm = psy;
 
@@ -1874,12 +1898,18 @@ static void s2mf301_muic_get_top_ops(struct s2mf301_muic_data *muic_data, struct
 {
 	union power_supply_propval value;
 	struct s2mf301_top_rid_ops *p_top_rid_ops;
-
-	s2mf301_info("%s, get ops success\n", __func__);
+    int ret = 0;
 
 	muic_data->rid_isr = s2mf301_muic_rid_isr;
 	value.strval = (const char *)muic_data;
-	power_supply_get_property(psy, (enum power_supply_property)POWER_SUPPLY_LSI_PROP_RID_OPS, &value);
+
+	ret = muic_psy_get_property(psy,
+			(enum power_supply_property)POWER_SUPPLY_LSI_PROP_RID_OPS,
+			&value);
+	if (ret) {
+		pr_err("%s failed to get psy prop, ret=%d\n", __func__, ret);
+		return;
+	}
 
 	muic_data->psy_top = psy;
 
@@ -2117,11 +2147,15 @@ static int of_s2mf301_muic_dt(struct device *dev,
 #endif /* CONFIG_MUIC_HV_SUPPORT_POGO_DOCK */
 
 #if !IS_ENABLED(CONFIG_MUIC_UART_SWITCH)
+#if LINUX_VERSION_CODE < KERNEL_VERSION(6, 2, 0)
 	if (of_gpio_count(np_muic) < 1) {
 		s2mf301_err("%s : could not find muic gpio\n", __func__);
 		sdata->gpio_uart_sel = -1;
 	} else
 		sdata->gpio_uart_sel = of_get_gpio(np_muic, 0);
+#else
+	sdata->gpio_uart_sel = of_get_named_gpio(np_muic, "gpios", 0);
+#endif
 #else
 	muic_data->pdata->uart_addr =
 	    (const char *)of_get_property(np_muic, "muic,uart_addr", NULL);
@@ -2220,6 +2254,11 @@ static int s2mf301_muic_probe(struct platform_device *pdev)
 	struct muic_ic_data *ic_data;
 	int ret = 0;
 	u8 adc = 0;
+
+    if (power_supply_get_by_name("s2mf301-pmeter") == NULL) {
+		pr_info("%s, pmeter is not probed\n", __func__);
+		return -EPROBE_DEFER;
+    }
 
 	s2mf301_info("%s start\n", __func__);
 	muic_data = devm_kzalloc(&pdev->dev, sizeof(*muic_data), GFP_KERNEL);
