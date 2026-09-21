@@ -6,7 +6,7 @@ ifneq ($(SEC_BUILD_CONF_USE_ESE_TZ), false)
 	ccflags-y += -DENABLE_ESE_SPI_SECURED
 endif
 
-ifeq ($(CONFIG_SAMSUNG_NFC),m)
+ifeq ($(filter m,$(CONFIG_SAMSUNG_NFC))$(filter y,$(CONFIG_NFC_ST21NFC)),my)
 obj-$(CONFIG_SAMSUNG_NFC)		+= nfc_stm_sec.o
 nfc_stm_sec-$(CONFIG_NFC_ST21NFC)		+= st21nfc.o
 nfc_stm_sec-$(CONFIG_NFC_ST54SPI_ESE_SUPPORT)	+= st54spi.o
