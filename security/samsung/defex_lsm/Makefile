@@ -272,7 +272,6 @@ ifneq ($(wildcard  $(defex_src)/pack_rules.c),)
     ccflags-y += $(DEFEX_DEFINES)
     asflags-y += $(DEFEX_DEFINES)
     hostprogs := pack_rules
-    hostprogs-y := pack_rules
     HOST_EXTRACFLAGS += $(ccflags-y)
     clean-files := $(obj)/defex_packed_rules.inc
     DEPEND_LIST := $(obj)/pack_rules
@@ -513,7 +512,6 @@ ifneq ($(wildcard  $(srctree)/$(src)/pack_rules.c),)
     EXTRA_CFLAGS += $(DEFEX_DEFINES)
     EXTRA_AFLAGS += $(DEFEX_DEFINES)
     hostprogs := pack_rules
-    hostprogs-y := pack_rules
     HOST_EXTRACFLAGS += $(DEFEX_DEFINES)
     clean-files := $(obj)/defex_packed_rules.inc
     DEPEND_LIST := $(obj)/pack_rules
