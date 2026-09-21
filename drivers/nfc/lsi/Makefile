@@ -3,7 +3,7 @@
 # Makefile for nfc devices
 #
 
-ifeq ($(CONFIG_SAMSUNG_NFC),m)
+ifeq ($(filter m,$(CONFIG_SAMSUNG_NFC))$(filter y,$(CONFIG_SEC_NFC)),my)
 obj-$(CONFIG_SAMSUNG_NFC)		+= nfc_slsi_sec.o
 nfc_slsi_sec-$(CONFIG_SEC_NFC)		+= sec_nfc.o
 nfc_slsi_sec-$(CONFIG_SEC_MX_NFC)	+= sec_nfc.o
