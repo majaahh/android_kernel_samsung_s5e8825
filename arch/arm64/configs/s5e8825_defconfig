@@ -346,6 +346,7 @@ CONFIG_ARCH_SPRD=y
 
 # CONFIG_SEC_A25X_PROJECT is not set
 # CONFIG_SEC_A53X_PROJECT is not set
+# CONFIG_SEC_GTA4XLS_PROJECT is not set
 
 #
 # Kernel Features
