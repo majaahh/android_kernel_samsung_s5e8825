@@ -7060,6 +7060,7 @@ CONFIG_TOUCHSCREEN_DUMP_MODE=m
 # CONFIG_INPUT_SEC_NOTIFIER is not set
 # CONFIG_SEC_INPUT_MULTI_DEVICE is not set
 # CONFIG_SEC_INPUT_RAWDATA is not set
+# CONFIG_EPEN_WACOM_WEZ01 is not set
 
 #
 # Enable Dropdump to logging dropped network packet
