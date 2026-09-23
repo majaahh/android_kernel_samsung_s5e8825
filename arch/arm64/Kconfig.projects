@@ -10,3 +10,9 @@ config SEC_A53X_PROJECT
 	bool "Samsung A53X Project"
 	help
 	  Support for Samsung A53X Project
+
+config SEC_GTA4XLS_PROJECT
+	default n
+	bool "Samsung GTA4XLS Project"
+	help
+	  Support for Samsung GTA4XLS Project
