@@ -18,6 +18,10 @@ dtbo-$(CONFIG_SEC_GTA4XLS_PROJECT) += \
     gta4xls/gta4xls_eur_open_w00_r02.dtbo \
     gta4xls/gta4xls_eur_open_w00_r03.dtbo
 
+dtbo-$(CONFIG_SEC_M34X_PROJECT) += \
+    m34x/m34x_eur_open_w00_r00.dtbo \
+    m34x/m34x_eur_open_w00_r01.dtbo
+
 targets += dtbs
 always-y := $(dtbo-y)
 
