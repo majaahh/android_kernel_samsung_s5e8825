@@ -16,3 +16,9 @@ config SEC_GTA4XLS_PROJECT
 	bool "Samsung GTA4XLS Project"
 	help
 	  Support for Samsung GTA4XLS Project
+
+config SEC_N34X_PROJECT
+	default n
+	bool "Samsung M34X Project"
+	help
+	  Support for Samsung M34X Project
