@@ -1428,7 +1428,21 @@ static void goodix_ts_report_status(struct goodix_ts_core *cd, struct goodix_ts_
 		}
 	} else if (ts_event->status_type == TYPE_STATUS_EVENT_VENDOR_INFO) {
 		if (ts_event->status_id == STATUS_EVENT_VENDOR_PROXIMITY) {
-			ts_event->status_data[0] = ts_event->status_data[0] == 5 || !ts_event->status_data[0];
+			u8 t_id = 0;
+			bool finger_in_sensor_zone =
+					cd->plat_data->coord[t_id].action != SEC_TS_COORDINATE_ACTION_RELEASE &&
+					cd->plat_data->coord[t_id].action != SEC_TS_COORDINATE_ACTION_FORCE_RELEASE &&
+					cd->plat_data->coord[t_id].y < 380 &&
+					cd->plat_data->coord[t_id].x > 380 &&
+					cd->plat_data->coord[t_id].x < 700;
+
+			if (atomic_read(&cd->plat_data->power_state) == SEC_INPUT_STATE_LPM ||
+					!cd->plat_data->touch_count ||
+					finger_in_sensor_zone) {
+				ts_event->status_data[0] = ts_event->status_data[0] == 5 || !ts_event->status_data[0];
+			} else {
+				ts_event->status_data[0] = 1;
+			}
 			cd->ts_event.hover_event = ts_event->status_data[0];
 
 			if (atomic_read(&cd->plat_data->power_state) == SEC_INPUT_STATE_LPM || !cd->plat_data->touch_count) {
