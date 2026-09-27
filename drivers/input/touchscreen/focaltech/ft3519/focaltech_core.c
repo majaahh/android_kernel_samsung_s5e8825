@@ -848,6 +848,7 @@ static int fts_read_proximity_result(struct fts_ts_data *ts_data)
 	int ret = 0;
 	u8 val = 0;
 	u8 new_hover;
+	bool finger_in_sensor_zone;
 
 	ret = fts_read_reg(PROXIMITY_DATA_REG, &val);
 	if (ret < 0) {
@@ -855,7 +856,19 @@ static int fts_read_proximity_result(struct fts_ts_data *ts_data)
 		return ret;
 	}
 
-	new_hover = (((val >> 4) == 5) || !((val >> 4)));
+	finger_in_sensor_zone =
+			ts_data->touch_point > 0 && EVENT_DOWN(ts_data->events[0].flag) &&
+			ts_data->events[0].y < 380 &&
+			ts_data->events[0].x > 380 &&
+			ts_data->events[0].x < 700;
+
+	if (atomic_read(&ts_data->pdata->power_state) == SEC_INPUT_STATE_LPM ||
+			!ts_data->touchs ||
+			finger_in_sensor_zone) {
+		new_hover = (((val >> 4) == 5) || !((val >> 4)));
+	} else {
+		new_hover = 1;
+	}
 
 	if (ts_data->hover_event == new_hover)
 		return 0;
