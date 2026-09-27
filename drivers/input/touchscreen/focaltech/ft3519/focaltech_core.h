@@ -276,6 +276,7 @@ struct fts_ts_data {
 	u32 print_info_cnt_open;
 	u32 print_info_cnt_release;
 	struct delayed_work read_info_work;
+	struct delayed_work ed_recheck_work;
 
 	bool have_key;
 	u32 key_number;
@@ -294,6 +295,7 @@ struct fts_ts_data {
 #endif
 
 	u8 hover_event;
+	u8 ed_recheck_cnt;
 };
 
 enum _FTS_BUS_TYPE {
