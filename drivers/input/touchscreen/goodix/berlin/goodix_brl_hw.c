@@ -1370,15 +1370,37 @@ static void goodix_ed_recheck_work(struct work_struct *work)
 	struct goodix_ts_core *cd = container_of(to_delayed_work(work),
 			struct goodix_ts_core, ed_recheck_work);
 
-	if (cd->plat_data->touch_count || !cd->plat_data->ed_enable)
+	if (cd->plat_data->touch_count || !cd->plat_data->ed_enable) {
+		cd->ts_event.ed_checking = false;
+		return;
+	}
+
+	if (cd->ts_event.ed_checking) {
+		cd->ts_event.ed_checking = false;
+		cd->hw_ops->ed_enable(cd, cd->plat_data->ed_enable);
+
+		if (!cd->ts_event.hover_event &&
+				atomic_read(&cd->plat_data->power_state) == SEC_INPUT_STATE_LPM &&
+				cd->plat_data->ed_enable != 3)
+			schedule_delayed_work(&cd->ed_recheck_work, msecs_to_jiffies(2000));
+		return;
+	}
+
+	if (cd->ts_event.hover_event)
 		return;
 
-	if (cd->ts_event.ed_recheck_cnt >= 3)
+	if (atomic_read(&cd->plat_data->power_state) == SEC_INPUT_STATE_LPM &&
+			cd->plat_data->ed_enable != 3) {
+		cd->ts_event.ed_checking = true;
+		cd->hw_ops->ed_enable(cd, 0);
+		cd->hw_ops->ed_enable(cd, 3);
+		schedule_delayed_work(&cd->ed_recheck_work, msecs_to_jiffies(100));
 		return;
+	}
 
-	cd->ts_event.ed_recheck_cnt++;
 	cd->hw_ops->ed_enable(cd, 0);
 	cd->hw_ops->ed_enable(cd, cd->plat_data->ed_enable);
+	schedule_delayed_work(&cd->ed_recheck_work, msecs_to_jiffies(400));
 }
 
 static void goodix_ts_report_finger(struct goodix_ts_core *cd, unsigned int tid)
@@ -1404,10 +1426,8 @@ static void goodix_ts_report_finger(struct goodix_ts_core *cd, unsigned int tid)
 
 	if (prev_tc != 0 && cd->plat_data->touch_count == 0) {
 		sec_input_proximity_report(cd->bus->dev, cd->ts_event.hover_event);
-		if (!cd->ts_event.hover_event) {
-			cd->ts_event.ed_recheck_cnt = 0;
+		if (!cd->ts_event.hover_event)
 			schedule_delayed_work(&cd->ed_recheck_work, msecs_to_jiffies(150));
-		}
 	}
 
 	prev_tc = cd->plat_data->touch_count;
@@ -1469,10 +1489,12 @@ static void goodix_ts_report_status(struct goodix_ts_core *cd, struct goodix_ts_
 			}
 			cd->ts_event.hover_event = ts_event->status_data[0];
 
-			if (cd->ts_event.hover_event)
-				cancel_delayed_work(&cd->ed_recheck_work);
-			else if (!cd->plat_data->touch_count && cd->ts_event.ed_recheck_cnt < 3)
+			if (cd->ts_event.hover_event) {
+				if (!cd->ts_event.ed_checking)
+					cancel_delayed_work(&cd->ed_recheck_work);
+			} else if (!cd->plat_data->touch_count) {
 				schedule_delayed_work(&cd->ed_recheck_work, msecs_to_jiffies(150));
+			}
 
 			if (atomic_read(&cd->plat_data->power_state) == SEC_INPUT_STATE_LPM || !cd->plat_data->touch_count) {
 				// Report actual range through hover proximity and block touch proximity during screen on
