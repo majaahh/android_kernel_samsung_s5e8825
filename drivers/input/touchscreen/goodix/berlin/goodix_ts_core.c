@@ -2623,6 +2623,7 @@ static int goodix_ts_remove(struct platform_device *pdev)
 	atomic_set(&core_data->plat_data->shutdown_called, true);
 	cancel_delayed_work_sync(&core_data->work_read_info);
 	cancel_delayed_work_sync(&core_data->work_print_info);
+	cancel_delayed_work_sync(&core_data->ed_recheck_work);
 
 	/* for debugging */
 	cancel_delayed_work_sync(&core_data->debug_delayed_work);

@@ -29,6 +29,7 @@ enum brl_request_code {
 };
 
 static int brl_after_event_handler(struct goodix_ts_core *cd);
+static void goodix_ed_recheck_work(struct work_struct *work);
 
 static int brl_dev_confirm(struct goodix_ts_core *cd)
 {
@@ -56,6 +57,8 @@ static int brl_dev_confirm(struct goodix_ts_core *cd)
 		ret = -EINVAL;
 		ts_err("device confirm failed, rx_buf:%*ph", 8, rx_buf);
 	}
+
+	INIT_DELAYED_WORK(&cd->ed_recheck_work, goodix_ed_recheck_work);
 
 	ts_info("device connected");
 	return ret;
@@ -1362,6 +1365,22 @@ static void goodix_parse_finger(struct goodix_ts_core *cd, unsigned int tid, u8 
 	cd->ts_event.event_type |= EVENT_TOUCH;
 }
 
+static void goodix_ed_recheck_work(struct work_struct *work)
+{
+	struct goodix_ts_core *cd = container_of(to_delayed_work(work),
+			struct goodix_ts_core, ed_recheck_work);
+
+	if (cd->plat_data->touch_count || !cd->plat_data->ed_enable)
+		return;
+
+	if (cd->ts_event.ed_recheck_cnt >= 3)
+		return;
+
+	cd->ts_event.ed_recheck_cnt++;
+	cd->hw_ops->ed_enable(cd, 0);
+	cd->hw_ops->ed_enable(cd, cd->plat_data->ed_enable);
+}
+
 static void goodix_ts_report_finger(struct goodix_ts_core *cd, unsigned int tid)
 {
 	int i;
@@ -1383,8 +1402,13 @@ static void goodix_ts_report_finger(struct goodix_ts_core *cd, unsigned int tid)
 	if (recal_tc != cd->plat_data->touch_count && prev_tc != cd->plat_data->touch_count)
 		ts_err("recal_tc:%d != tc:%d", recal_tc, cd->plat_data->touch_count);
 
-	if (prev_tc != 0 && cd->plat_data->touch_count == 0)
+	if (prev_tc != 0 && cd->plat_data->touch_count == 0) {
 		sec_input_proximity_report(cd->bus->dev, cd->ts_event.hover_event);
+		if (!cd->ts_event.hover_event) {
+			cd->ts_event.ed_recheck_cnt = 0;
+			schedule_delayed_work(&cd->ed_recheck_work, msecs_to_jiffies(150));
+		}
+	}
 
 	prev_tc = cd->plat_data->touch_count;
 }
@@ -1444,6 +1468,11 @@ static void goodix_ts_report_status(struct goodix_ts_core *cd, struct goodix_ts_
 				ts_event->status_data[0] = 1;
 			}
 			cd->ts_event.hover_event = ts_event->status_data[0];
+
+			if (cd->ts_event.hover_event)
+				cancel_delayed_work(&cd->ed_recheck_work);
+			else if (!cd->plat_data->touch_count && cd->ts_event.ed_recheck_cnt < 3)
+				schedule_delayed_work(&cd->ed_recheck_work, msecs_to_jiffies(150));
 
 			if (atomic_read(&cd->plat_data->power_state) == SEC_INPUT_STATE_LPM || !cd->plat_data->touch_count) {
 				// Report actual range through hover proximity and block touch proximity during screen on

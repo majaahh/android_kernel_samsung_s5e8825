@@ -445,6 +445,7 @@ struct goodix_ts_event {
 	unsigned char status_data[5];
 
 	u8 hover_event; //virtual_prox
+	u8 ed_recheck_cnt;
 };
 
 enum goodix_ic_bus_type {
@@ -639,6 +640,7 @@ struct goodix_ts_core {
 	struct workqueue_struct *irq_workqueue;
 	struct delayed_work work_print_info;
 	struct delayed_work work_read_info;
+	struct delayed_work ed_recheck_work;
 	/* for debugging */
 	struct delayed_work debug_delayed_work;
 	bool info_work_done;
