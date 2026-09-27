@@ -843,6 +843,22 @@ static int fts_read_pocket_result(struct fts_ts_data *ts_data)
 	return 0;
 }
 
+static void fts_ed_recheck_work(struct work_struct *work)
+{
+	struct fts_ts_data *ts_data = container_of(work, struct fts_ts_data,
+			ed_recheck_work.work);
+
+	if (ts_data->touchs || !ts_data->pdata->ed_enable)
+		return;
+
+	if (ts_data->ed_recheck_cnt >= 3)
+		return;
+
+	ts_data->ed_recheck_cnt++;
+	fts_write_reg(FTS_REG_PROXIMITY_MODE, 0);
+	fts_write_reg(FTS_REG_PROXIMITY_MODE, ts_data->pdata->ed_enable);
+}
+
 static int fts_read_proximity_result(struct fts_ts_data *ts_data)
 {
 	int ret = 0;
@@ -874,6 +890,11 @@ static int fts_read_proximity_result(struct fts_ts_data *ts_data)
 		return 0;
 
 	ts_data->hover_event = new_hover;
+
+	if (ts_data->hover_event)
+		cancel_delayed_work(&ts_data->ed_recheck_work);
+	else if (!ts_data->touchs && ts_data->ed_recheck_cnt < 3)
+		schedule_delayed_work(&ts_data->ed_recheck_work, msecs_to_jiffies(150));
 
 	if (atomic_read(&ts_data->pdata->power_state) == SEC_INPUT_STATE_LPM || !ts_data->touchs) {
 		// Report actual range through hover proximity and block touch proximity during screen on
@@ -1196,6 +1217,10 @@ static void fts_irq_read_report(void)
 		if (prev_touchs != 0 && ts_data->touchs == 0 && ts_data->pdata->ed_enable) {
 			input_report_abs(ts_data->pdata->input_dev_proximity, ABS_MT_CUSTOM, ts_data->hover_event);
 			input_sync(ts_data->pdata->input_dev_proximity);
+			if (!ts_data->hover_event) {
+				ts_data->ed_recheck_cnt = 0;
+				schedule_delayed_work(&ts_data->ed_recheck_work, msecs_to_jiffies(150));
+			}
 		}
 	}
 
@@ -2314,6 +2339,7 @@ static int fts_ts_probe_entry(struct fts_ts_data *ts_data)
 
 	INIT_DELAYED_WORK(&ts_data->print_info_work, fts_print_info_work);
 	INIT_DELAYED_WORK(&ts_data->read_info_work, fts_read_info_work);
+	INIT_DELAYED_WORK(&ts_data->ed_recheck_work, fts_ed_recheck_work);
 	if (!atomic_read(&ts_data->pdata->shutdown_called))
 		schedule_delayed_work(&ts_data->read_info_work, msecs_to_jiffies(50));
 
@@ -2358,6 +2384,7 @@ static int fts_ts_remove_entry(struct fts_ts_data *ts_data)
 	disable_irq(ts_data->irq);
 	cancel_delayed_work_sync(&ts_data->print_info_work);
 	cancel_delayed_work_sync(&ts_data->read_info_work);
+	cancel_delayed_work_sync(&ts_data->ed_recheck_work);
 
 #if IS_ENABLED(CONFIG_VBUS_NOTIFIER)
 	vbus_notifier_unregister(&ts_data->vbus_nb);
