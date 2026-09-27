@@ -295,7 +295,7 @@ struct fts_ts_data {
 #endif
 
 	u8 hover_event;
-	u8 ed_recheck_cnt;
+	bool ed_checking;
 };
 
 enum _FTS_BUS_TYPE {

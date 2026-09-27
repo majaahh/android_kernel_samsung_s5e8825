@@ -848,15 +848,37 @@ static void fts_ed_recheck_work(struct work_struct *work)
 	struct fts_ts_data *ts_data = container_of(work, struct fts_ts_data,
 			ed_recheck_work.work);
 
-	if (ts_data->touchs || !ts_data->pdata->ed_enable)
+	if (ts_data->touchs || !ts_data->pdata->ed_enable) {
+		ts_data->ed_checking = false;
+		return;
+	}
+
+	if (ts_data->ed_checking) {
+		ts_data->ed_checking = false;
+		fts_write_reg(FTS_REG_PROXIMITY_MODE, ts_data->pdata->ed_enable);
+
+		if (!ts_data->hover_event &&
+				atomic_read(&ts_data->pdata->power_state) == SEC_INPUT_STATE_LPM &&
+				ts_data->pdata->ed_enable != 3)
+			schedule_delayed_work(&ts_data->ed_recheck_work, msecs_to_jiffies(2000));
+		return;
+	}
+
+	if (ts_data->hover_event)
 		return;
 
-	if (ts_data->ed_recheck_cnt >= 3)
+	if (atomic_read(&ts_data->pdata->power_state) == SEC_INPUT_STATE_LPM &&
+			ts_data->pdata->ed_enable != 3) {
+		ts_data->ed_checking = true;
+		fts_write_reg(FTS_REG_PROXIMITY_MODE, 0);
+		fts_write_reg(FTS_REG_PROXIMITY_MODE, 3);
+		schedule_delayed_work(&ts_data->ed_recheck_work, msecs_to_jiffies(100));
 		return;
+	}
 
-	ts_data->ed_recheck_cnt++;
 	fts_write_reg(FTS_REG_PROXIMITY_MODE, 0);
 	fts_write_reg(FTS_REG_PROXIMITY_MODE, ts_data->pdata->ed_enable);
+	schedule_delayed_work(&ts_data->ed_recheck_work, msecs_to_jiffies(400));
 }
 
 static int fts_read_proximity_result(struct fts_ts_data *ts_data)
@@ -891,10 +913,12 @@ static int fts_read_proximity_result(struct fts_ts_data *ts_data)
 
 	ts_data->hover_event = new_hover;
 
-	if (ts_data->hover_event)
-		cancel_delayed_work(&ts_data->ed_recheck_work);
-	else if (!ts_data->touchs && ts_data->ed_recheck_cnt < 3)
+	if (ts_data->hover_event) {
+		if (!ts_data->ed_checking)
+			cancel_delayed_work(&ts_data->ed_recheck_work);
+	} else if (!ts_data->touchs) {
 		schedule_delayed_work(&ts_data->ed_recheck_work, msecs_to_jiffies(150));
+	}
 
 	if (atomic_read(&ts_data->pdata->power_state) == SEC_INPUT_STATE_LPM || !ts_data->touchs) {
 		// Report actual range through hover proximity and block touch proximity during screen on
@@ -1217,10 +1241,8 @@ static void fts_irq_read_report(void)
 		if (prev_touchs != 0 && ts_data->touchs == 0 && ts_data->pdata->ed_enable) {
 			input_report_abs(ts_data->pdata->input_dev_proximity, ABS_MT_CUSTOM, ts_data->hover_event);
 			input_sync(ts_data->pdata->input_dev_proximity);
-			if (!ts_data->hover_event) {
-				ts_data->ed_recheck_cnt = 0;
+			if (!ts_data->hover_event)
 				schedule_delayed_work(&ts_data->ed_recheck_work, msecs_to_jiffies(150));
-			}
 		}
 	}
 
