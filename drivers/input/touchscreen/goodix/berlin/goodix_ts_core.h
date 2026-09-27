@@ -445,7 +445,7 @@ struct goodix_ts_event {
 	unsigned char status_data[5];
 
 	u8 hover_event; //virtual_prox
-	u8 ed_recheck_cnt;
+	bool ed_checking;
 };
 
 enum goodix_ic_bus_type {
