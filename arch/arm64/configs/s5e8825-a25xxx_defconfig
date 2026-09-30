@@ -7112,14 +7112,6 @@ CONFIG_SB_VOTE=y
 # end of SB Core configs
 
 CONFIG_SEC_KQ_MESH=m
-
-#
-# samsung Performace manager
-#
-CONFIG_KPERFMON=y
-CONFIG_KPERFMON_BUILD=m
-# end of samsung Performace manager
-
 CONFIG_SENSORS_FINGERPRINT=m
 CONFIG_FINGERPRINT_SECURE=y
 # CONFIG_SENSORS_FPRINT_SECURE is not set
