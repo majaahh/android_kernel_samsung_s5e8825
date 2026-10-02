@@ -49,7 +49,8 @@ static const u8 uabi_classes[] = {
 	[VIDEO_ENHANCEMENT_CLASS] = I915_ENGINE_CLASS_VIDEO_ENHANCE,
 };
 
-static int engine_cmp(void *priv, struct list_head *A, struct list_head *B)
+static int engine_cmp(void *priv, const struct list_head *A,
+		      const struct list_head *B)
 {
 	const struct intel_engine_cs *a =
 		container_of((struct rb_node *)A, typeof(*a), uabi_node);
@@ -231,7 +232,7 @@ void intel_engines_driver_register(struct drm_i915_private *i915)
 		p = &prev->rb_right;
 	}
 
-	if (IS_ENABLED(CONFIG_DRM_I915_SELFTESTS) &&
+	if (IS_ENABLED(CONFIG_DRM_I915_SELFTEST) &&
 	    IS_ENABLED(CONFIG_DRM_I915_DEBUG_GEM)) {
 		struct intel_engine_cs *engine;
 		unsigned int isolation;
