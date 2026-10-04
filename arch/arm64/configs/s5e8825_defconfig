@@ -348,7 +348,7 @@ CONFIG_ARCH_EXYNOS=y
 # CONFIG_SEC_A25X_PROJECT is not set
 # CONFIG_SEC_A53X_PROJECT is not set
 # CONFIG_SEC_GTA4XLS_PROJECT is not set
-# CONFIG_SEC_N34X_PROJECT is not set
+# CONFIG_SEC_M34X_PROJECT is not set
 
 #
 # Kernel Features
