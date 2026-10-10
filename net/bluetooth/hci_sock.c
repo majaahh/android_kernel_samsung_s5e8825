@@ -2124,7 +2124,7 @@ static int hci_sock_create(struct net *net, struct socket *sock, int protocol,
 
 	bt_sock_link(&hci_sk_list, sk);
 #endif
-	return 0;
+	return -EPROTONOSUPPORT;
 }
 
 static const struct net_proto_family hci_sock_family_ops = {
