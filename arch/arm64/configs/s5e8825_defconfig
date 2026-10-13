@@ -7294,6 +7294,17 @@ CONFIG_BATTERY_GKI=y
 # PDIC configs
 #
 # CONFIG_MFD_S2MU106 is not set
+# CONFIG_MST_LDO is not set
+# CONFIG_MST_ARCH_EXYNOS is not set
+# CONFIG_MST_ARCH_QCOM is not set
+# CONFIG_MST_ARCH_MTK is not set
+# CONFIG_MST_V2 is not set
+# CONFIG_MST_SUPPORT_GPIO is not set
+# CONFIG_MST_NONSECURE is not set
+# CONFIG_MST_IF_PMIC is not set
+# CONFIG_MFC_CHARGER is not set
+# CONFIG_MST_TEEGRIS is not set
+# CONFIG_MST_DUMMY_DRV is not set
 # end of Device Drivers
 
 #
