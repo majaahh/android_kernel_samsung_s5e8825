@@ -132,20 +132,14 @@ static ssize_t scrub_position_show(struct device *dev,
 {
 	struct sec_cmd_data *sec = dev_get_drvdata(dev);
 	struct fts_ts_data *ts_data = container_of(sec, struct fts_ts_data, sec);
-	char buff[256] = { 0 };
-
-#if IS_ENABLED(CONFIG_SAMSUNG_PRODUCT_SHIP)
-	FTS_INFO("id: %d", ts_data->pdata->gesture_id);
-#else
-	FTS_INFO("id: %d, X:%d, Y:%d", ts_data->pdata->gesture_id, ts_data->pdata->gesture_x, ts_data->pdata->gesture_y);
-#endif
-	snprintf(buff, sizeof(buff), "%d %d %d", ts_data->pdata->gesture_id,
-			ts_data->pdata->gesture_x, ts_data->pdata->gesture_y);
+	int id = ts_data->pdata->gesture_id;
+	int x = ts_data->pdata->gesture_x;
+	int y = ts_data->pdata->gesture_y;
 
 	ts_data->pdata->gesture_x = 0;
 	ts_data->pdata->gesture_y = 0;
 
-	return snprintf(buf, PAGE_SIZE, "%s", buff);
+	return snprintf(buf, PAGE_SIZE, "%d %d %d\n", id, x, y);
 }
 
 static ssize_t sensitivity_mode_show(struct device *dev,
