@@ -6,6 +6,13 @@ dtbo-$(CONFIG_SEC_A25X_PROJECT) += \
     a25x/a25x_eur_open_w00_r04.dtbo \
     a25x/a25x_eur_open_w00_r05.dtbo
 
+dtbo-$(CONFIG_SEC_A33X_PROJECT) += \
+    a33x/a33x_eur_open_w00_r00.dtbo \
+    a33x/a33x_eur_open_w00_r01.dtbo \
+    a33x/a33x_eur_open_w00_r02.dtbo \
+    a33x/a33x_eur_open_w00_r03.dtbo \
+    a33x/a33x_eur_open_w00_r04.dtbo
+
 targets += dtbs
 always-y := $(dtbo-y)
 
