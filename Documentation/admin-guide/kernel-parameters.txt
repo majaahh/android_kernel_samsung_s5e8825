@@ -1591,6 +1591,26 @@
 			corresponding firmware-first mode error processing
 			logic will be disabled.
 
+	hibernate=	[HIBERNATION]
+		noresume	Don't check if there's a hibernation image
+				present during boot.
+		nocompress	Don't compress/decompress hibernation images.
+		no		Disable hibernation and resume.
+		protect_image	Turn on image protection during restoration
+				(that will set all pages holding image data
+				during restoration read-only).
+
+	hibernate.compressor= 	[HIBERNATION] Compression algorithm to be
+				used with hibernation.
+				Format: { lzo | lz4 }
+				Default: lzo
+
+				lzo: Select LZO compression algorithm to
+				compress/decompress hibernation image.
+
+				lz4: Select LZ4 compression algorithm to
+				compress/decompress hibernation image.
+
 	highmem=nn[KMG]	[KNL,BOOT] forces the highmem zone to have an exact
 			size of <nn>. This works even on boxes that have no
 			highmem otherwise. This also works to reduce highmem
@@ -3032,6 +3052,7 @@
 					       spectre_v2_user=off [X86]
 					       ssbd=force-off [ARM64]
 					       tsx_async_abort=off [X86]
+					       vmscape=off [X86]
 
 				Exceptions:
 					       This does not have any effect on
@@ -4942,6 +4963,9 @@
 
 	rootflags=	[KNL] Set root filesystem mount option string
 
+	initramfs_options= [KNL]
+                        Specify mount options for for the initramfs mount.
+
 	rootfstype=	[KNL] Set root filesystem type
 
 	rootwait	[KNL] Wait (indefinitely) for root device to show up.
@@ -6130,6 +6154,16 @@
 
 	vmpoff=		[KNL,S390] Perform z/VM CP command after power off.
 			Format: <command>
+
+	vmscape=	[X86] Controls mitigation for VMscape attacks.
+			VMscape attacks can leak information from a userspace
+			hypervisor to a guest via speculative side-channels.
+
+			off		- disable the mitigation
+			ibpb		- use Indirect Branch Prediction Barrier
+					  (IBPB) mitigation (default)
+			force		- force vulnerability detection even on
+					  unaffected processors
 
 	vsyscall=	[X86-64]
 			Controls the behavior of vsyscalls (i.e. calls to
