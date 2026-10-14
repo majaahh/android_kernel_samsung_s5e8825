@@ -3107,6 +3107,7 @@ static ssize_t scrub_pos_show(struct device *dev,
 	snprintf(buff, sizeof(buff), "%d %d %d", cd->plat_data->gesture_id,
 			cd->plat_data->gesture_x, cd->plat_data->gesture_y);
 
+	cd->plat_data->gesture_id = 0;
 	cd->plat_data->gesture_x = 0;
 	cd->plat_data->gesture_y = 0;
 

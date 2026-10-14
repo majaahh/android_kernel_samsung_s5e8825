@@ -765,15 +765,15 @@ void sec_input_gesture_report(struct device *dev, int id, int x, int y)
 	struct sec_ts_plat_data *pdata = dev->platform_data;
 	char buff[SEC_TS_GESTURE_REPORT_BUFF_SIZE] = { 0 };
 
+	pdata->gesture_id = id;
+	pdata->gesture_x = x;
+	pdata->gesture_y = y;
+
 	if (pdata->support_gesture_uevent) {
 		if (!IS_ERR_OR_NULL(pdata->sec))
 			sec_cmd_send_gesture_uevent(pdata->sec, id, x, y);
 		return;
 	}
-
-	pdata->gesture_id = id;
-	pdata->gesture_x = x;
-	pdata->gesture_y = y;
 
 	input_report_key(pdata->input_dev, KEY_BLACK_UI_GESTURE, 1);
 	input_sync(pdata->input_dev);

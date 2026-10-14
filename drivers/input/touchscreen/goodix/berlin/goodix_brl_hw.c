@@ -1570,6 +1570,7 @@ static void goodix_ts_report_gesture(struct goodix_ts_core *cd, struct goodix_ts
 			ts_event->scrub_y = (ts_event->gesture_data[1] << 4) | (ts_event->gesture_data[2] & 0x0F);
 			sec_input_gesture_report(cd->bus->dev, ts_event->scrub_id,
 							ts_event->scrub_x, ts_event->scrub_y);
+			sysfs_notify(&cd->sec.fac_dev->kobj, NULL, "scrub_pos");
 			ts_info("FOD %sPRESS", ts_event->gesture_id ? "" : "LONG");
 		} else if (ts_event->gesture_id == 2) {
 			ts_event->scrub_id = SPONGE_EVENT_TYPE_FOD_RELEASE;
@@ -1577,12 +1578,14 @@ static void goodix_ts_report_gesture(struct goodix_ts_core *cd, struct goodix_ts
 			ts_event->scrub_y = (ts_event->gesture_data[1] << 4) | (ts_event->gesture_data[2] & 0x0F);
 			sec_input_gesture_report(cd->bus->dev, ts_event->scrub_id,
 							ts_event->scrub_x, ts_event->scrub_y);
+			sysfs_notify(&cd->sec.fac_dev->kobj, NULL, "scrub_pos");
 		} else if (ts_event->gesture_id == 3) {
 			ts_event->scrub_id = SPONGE_EVENT_TYPE_FOD_OUT;
 			ts_event->scrub_x = (ts_event->gesture_data[0] << 4) | (ts_event->gesture_data[2] >> 4);
 			ts_event->scrub_y = (ts_event->gesture_data[1] << 4) | (ts_event->gesture_data[2] & 0x0F);
 			sec_input_gesture_report(cd->bus->dev, ts_event->scrub_id,
 							ts_event->scrub_x, ts_event->scrub_y);
+			sysfs_notify(&cd->sec.fac_dev->kobj, NULL, "scrub_pos");
 		} else if (ts_event->gesture_id == 4) {
 			ts_info("FOD VI");
 		}
